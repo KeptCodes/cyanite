@@ -21,8 +21,8 @@ To set up the SpongeBob Desktop client, follow these steps:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/<your-username>/spongebob-desktop.git
-   cd spongebob-desktop
+   git clone https://github.com/<your-username>/spongebob-server.git
+   cd spongebob-server
    ```
 
 2. **Build the project**:
@@ -40,7 +40,7 @@ To set up the SpongeBob Desktop client, follow these steps:
    After building the project, run the compiled executable:
 
    ```bash
-   ./spongebob-desktop
+   ./spongebob-server
    ```
 
 4. **System Tray**:
