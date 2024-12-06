@@ -7,12 +7,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
-	"github.com/keptcodes/spongebob-desktop/internal/config"
-	"github.com/keptcodes/spongebob-desktop/internal/utils"
+	"github.com/keptcodes/lumo-server/internal/config"
+	"github.com/keptcodes/lumo-server/internal/utils"
 )
 
 
@@ -43,7 +44,7 @@ func ProcessAction(message []byte) (string, string){
 	switch action.Action {
 	case "key_press":
 		// Handle key press action
-		presskeys(action.Inputs)
+		pressKeys(action.Inputs)
 		return "success", "Key press action completed"
 	case "screenshot":
 		// Handle screenshot action
@@ -106,15 +107,44 @@ func takeScreenshot() (string, string) {
 }
 
 // PressShortcut simulates pressing a key combination
-func presskeys(keys []string) error {
-
-	// Press the shortcut keys using robotgo
-	for _, key := range keys {
-		robotgo.KeyTap(key)
+func pressKeys(keys []string) error {
+	// Convert keys to lowercase for consistency
+	for i := range keys {
+		keys[i] = strings.ToLower(keys[i])
 	}
 
-	log.Printf("Pressed keys: %v", keys)
+	// Press modifier keys first (e.g., shift, ctrl, alt)
+	for _, key := range keys {
+		if isModifierKey(key) {
+			robotgo.KeyToggle(key, "down") // Press the modifier key
+		}
+	}
+
+	// Press other keys
+	for _, key := range keys {
+		if !isModifierKey(key) {
+			robotgo.KeyTap(key) // Tap the non-modifier key
+		}
+	}
+
+	// Release modifier keys
+	for _, key := range keys {
+		if isModifierKey(key) {
+			robotgo.KeyToggle(key, "up") // Release the modifier key
+		}
+	}
+
 	return nil
+}
+
+func isModifierKey(key string) bool {
+	modifiers := []string{"shift", "ctrl", "alt", "command", "cmd"}
+	for _, mod := range modifiers {
+		if key == mod {
+			return true
+		}
+	}
+	return false
 }
 
 // ShutdownPC shuts down the PC

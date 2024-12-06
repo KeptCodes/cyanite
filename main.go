@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/keptcodes/spongebob-desktop/internal/gui"
-	"github.com/keptcodes/spongebob-desktop/internal/websocket"
+	"github.com/keptcodes/lumo-server/internal/gui"
+	"github.com/keptcodes/lumo-server/internal/websocket"
 )
 
 func main() {

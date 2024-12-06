@@ -1,11 +1,11 @@
 <div align="center">
-    <img src="assets\spongebob.jpg" width="400" />
-    <h2>SpongeBob Desktop</h2>
+    <img src="assets\lumo_transparent.png" width="400" />
+    <h2>Lumo Desktop</h2>
 </div>
 
 ## Project Overview
 
-SpongeBob Desktop is a lightweight background client that allows seamless communication between your desktop and mobile devices. It integrates functionalities such as controlling the desktop remotely, checking mobile connection status, and setting a secret code for secure interaction.
+Lumo Desktop is a lightweight background client that allows seamless communication between your desktop and mobile devices. It integrates functionalities such as controlling the desktop remotely, checking mobile connection status, and setting a secret code for secure interaction.
 
 ## Features
 
@@ -16,13 +16,13 @@ SpongeBob Desktop is a lightweight background client that allows seamless commun
 
 ## Installation
 
-To set up the SpongeBob Desktop client, follow these steps:
+To set up the Lumo Desktop client, follow these steps:
 
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/<your-username>/spongebob-server.git
-   cd spongebob-server
+   git clone https://github.com/<your-username>/lumo-server.git
+   cd lumo-server
    ```
 
 2. **Build the project**:
@@ -40,12 +40,12 @@ To set up the SpongeBob Desktop client, follow these steps:
    After building the project, run the compiled executable:
 
    ```bash
-   ./spongebob-server
+   ./lumo-server
    ```
 
 4. **System Tray**:
 
-   Upon running, SpongeBob Desktop will minimize to the system tray. You can interact with it through the tray icon.
+   Upon running, lumo Desktop will minimize to the system tray. You can interact with it through the tray icon.
 
 ## TODO
 

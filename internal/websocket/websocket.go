@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/gorilla/websocket"
-	"github.com/keptcodes/spongebob-desktop/internal/actions"
-	"github.com/keptcodes/spongebob-desktop/internal/utils"
+	"github.com/keptcodes/lumo-server/internal/actions"
+	"github.com/keptcodes/lumo-server/internal/utils"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -104,8 +104,6 @@ func createFilesDirectory() {
 		if err != nil {
 			log.Fatalf("Error creating _data/files directory: %v", err)
 		}
-		log.Printf("Created directory: %s", filesDir)
-	} else {
-		log.Printf("Directory %s already exists", filesDir)
+
 	}
 }
