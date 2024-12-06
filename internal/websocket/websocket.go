@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/gorilla/websocket"
-	"github.com/keptcodes/lumo-server/internal/actions"
-	"github.com/keptcodes/lumo-server/internal/utils"
+	"github.com/keptcodes/syra-server/internal/actions"
+	"github.com/keptcodes/syra-server/internal/utils"
 )
 
 var upgrader = websocket.Upgrader{}

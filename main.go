@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/keptcodes/lumo-server/internal/gui"
-	"github.com/keptcodes/lumo-server/internal/websocket"
+	"github.com/keptcodes/syra-server/internal/gui"
+	"github.com/keptcodes/syra-server/internal/websocket"
 )
 
 func main() {

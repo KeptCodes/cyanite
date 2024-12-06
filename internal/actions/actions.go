@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
-	"github.com/keptcodes/lumo-server/internal/config"
-	"github.com/keptcodes/lumo-server/internal/utils"
+	"github.com/keptcodes/syra-server/internal/config"
+	"github.com/keptcodes/syra-server/internal/utils"
 )
 
 

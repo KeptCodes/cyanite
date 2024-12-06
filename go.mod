@@ -1,4 +1,4 @@
-module github.com/keptcodes/lumo-server
+module github.com/keptcodes/syra-server
 
 go 1.23.3
 
