@@ -36,26 +36,10 @@ func onReady() {
 		log.Fatal("Error loading icon: ", err)
 	}
 	systray.SetIcon(iconData)
-	systray.SetTooltip("syra Desktop Client")
+	systray.SetTooltip("Syra Desktop Client")
 
 	// Show current secret code in the tray
 	systray.SetTooltip(fmt.Sprintf("Secret Code: %s", secretCode))
-
-	// Add menu to check mobile connection status
-	mMobileStatus := systray.AddMenuItem("Check Mobile Connection", "Check if mobile is connected")
-	go func() {
-		for range mMobileStatus.ClickedCh {
-			// Call a function to check if mobile is connected
-			ip, connected := getMobileIP() // Replace with your actual function to get the mobile IP
-			if connected {
-				log.Printf("Mobile is connected with IP: %s", ip)
-				systray.SetTooltip(fmt.Sprintf("Mobile IP: %s", ip))
-			} else {
-				log.Println("Mobile is not connected")
-				systray.SetTooltip("Mobile is not connected")
-			}
-		}
-	}()
 
 	// Add action to reset secret code
 	mResetSecretCode := systray.AddMenuItem("Reset Secret Code", "Generate a new secret code")
@@ -73,13 +57,11 @@ func onReady() {
 	}()
 
 	// Show Desktop and WebSocket IP
-	desktopIP := utils.GetOutboundIP() // Function to get your desktop IP address
-	wsIP := getWebSocketIP()     // Replace with actual WebSocket IP
-	mIP := systray.AddMenuItem(fmt.Sprintf("Desktop IP: %s", desktopIP), "WebSocket Server IP: "+wsIP)
+	desktopIP := utils.GetOutboundIP() // Function to get your desktop IP address  // Replace with actual WebSocket IP
+	mIP := systray.AddMenuItem(fmt.Sprintf("Desktop IP: %s", desktopIP), fmt.Sprintf("Server IP: %s", desktopIP))
 	go func() {
 		for range mIP.ClickedCh {
-			log.Printf("Desktop IP: %s", desktopIP)
-			log.Printf("WebSocket IP: %s", wsIP)
+			log.Printf("IP: %s", desktopIP)
 		}
 	}()
 
@@ -98,15 +80,4 @@ func onExit() {
 	log.Println("Tray exited")
 }
 
-// Function to get WebSocket IP (example: return server's IP)
-func getWebSocketIP() string {
-	// Replace with the actual WebSocket server IP
-	return "127.0.0.1" // Localhost for example
-}
 
-// Function to get mobile IP
-func getMobileIP() (string, bool) {
-	// Replace with the actual logic to check if mobile is connected
-	// For now, we simulate a connected mobile device
-	return "192.168.1.101", true
-}

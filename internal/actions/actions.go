@@ -16,15 +16,14 @@ import (
 	"github.com/keptcodes/syra-server/internal/utils"
 )
 
-
 type Action struct {
-	SecretCode string   `json:"secret_code"`
-	Action     string   `json:"action"`
-	Inputs     []string `json:"inputs"`
+	SecretCode string        `json:"secret_code"`
+	Action     string        `json:"action"`
+	Inputs     []interface{} `json:"inputs"`
 }
 
 // Function to process the message and perform the action
-func ProcessAction(message []byte) (string, string){
+func ProcessAction(message []byte) (string, string) {
 	var action Action
 	err := json.Unmarshal(message, &action)
 	if err != nil {
@@ -36,9 +35,6 @@ func ProcessAction(message []byte) (string, string){
 		log.Println("Invalid secret code")
 		return "error", "Invalid secret code"
 	}
-
-	// Log the parsed action
-	log.Printf("Received action: %s with inputs: %v", action.Action, action.Inputs)
 
 	// Based on the action type, you can perform different operations
 	switch action.Action {
@@ -54,14 +50,20 @@ func ProcessAction(message []byte) (string, string){
 		// Handle PC shutdown action
 		status, message := shutdownPC()
 		return status, message
-
+	case "mouse_move":
+		// Handle mouse movement action
+		status, message := moveMouse(action.Inputs)
+		return status, message
+	case "mouse_click":
+		// Handle mouse click action
+		status, message := clickMouse(action.Inputs)
+		return status, message
 	// Add more actions as needed
 	default:
 		log.Printf("Unknown action: %s", action.Action)
 		return "error", fmt.Sprintf("Unknown action: %s", action.Action)
 	}
 }
-
 
 func isValidSecretCode(secretCode string) bool {
 	// Read the saved secret code from config.json
@@ -86,6 +88,7 @@ func takeScreenshot() (string, string) {
 
 	// Save the screenshot as a PNG file
 	filePath := "_data/files/screenshot_" + time.Now().Format("20060102_150405") + ".png"
+	urlPath := "files/screenshot_" + time.Now().Format("20060102_150405") + ".png"
 	file, err := os.Create(filePath)
 	if err != nil {
 		log.Println("Error creating screenshot file:", err)
@@ -101,41 +104,58 @@ func takeScreenshot() (string, string) {
 	}
 
 	log.Printf("Screenshot saved as: %s", filePath)
-	ip := utils.GetOutboundIP();
-	imageURL := fmt.Sprintf("http://%s:8766/%s",ip, filePath)
+	ip := utils.GetOutboundIP()
+	imageURL := fmt.Sprintf("http://%s:8766/%s", ip, urlPath)
 	return "success", imageURL
 }
 
 // PressShortcut simulates pressing a key combination
-func pressKeys(keys []string) error {
+func pressKeys(keys []interface{}) error {
 	// Convert keys to lowercase for consistency
 	for i := range keys {
-		keys[i] = strings.ToLower(keys[i])
+		key, ok := keys[i].(string)
+		if !ok {
+			return fmt.Errorf("invalid key type at index %d, expected string", i)
+		}
+		keys[i] = strings.ToLower(key)
 	}
 
 	// Press modifier keys first (e.g., shift, ctrl, alt)
 	for _, key := range keys {
-		if isModifierKey(key) {
-			robotgo.KeyToggle(key, "down") // Press the modifier key
+		keyStr, ok := key.(string)
+		if !ok {
+			return fmt.Errorf("invalid key type, expected string")
+		}
+		if isModifierKey(keyStr) {
+			robotgo.KeyToggle(keyStr, "down") // Press the modifier key
 		}
 	}
 
 	// Press other keys
 	for _, key := range keys {
-		if !isModifierKey(key) {
-			robotgo.KeyTap(key) // Tap the non-modifier key
+		keyStr, ok := key.(string)
+		if !ok {
+			return fmt.Errorf("invalid key type, expected string")
+		}
+		if !isModifierKey(keyStr) {
+			robotgo.KeyTap(keyStr) // Tap the non-modifier key
 		}
 	}
 
 	// Release modifier keys
 	for _, key := range keys {
-		if isModifierKey(key) {
-			robotgo.KeyToggle(key, "up") // Release the modifier key
+		keyStr, ok := key.(string)
+		if !ok {
+			return fmt.Errorf("invalid key type, expected string")
+		}
+		if isModifierKey(keyStr) {
+			robotgo.KeyToggle(keyStr, "up") // Release the modifier key
 		}
 	}
 
 	return nil
 }
+
 
 func isModifierKey(key string) bool {
 	modifiers := []string{"shift", "ctrl", "alt", "command", "cmd"}
@@ -150,20 +170,20 @@ func isModifierKey(key string) bool {
 // ShutdownPC shuts down the PC
 func shutdownPC() (string, string) {
 	// Start the graceful shutdown process (without forcing)
-	cmd := exec.Command("shutdown", "/s", "/t", "60") // Wait for 60 seconds before forcing shutdown
+	cmd := exec.Command("shutdown", "/s", "/t", "10") // Wait for 60 seconds before forcing shutdown
 	err := cmd.Start()
 	if err != nil {
 		log.Println("Error initiating shutdown:", err)
 		return "error", "Error initiating graceful shutdown"
 	}
 
-	log.Println("Graceful shutdown initiated. Waiting for 1 minute...")
+	log.Println("Graceful shutdown initiated. Waiting for 10 seconds...")
 
-	// Wait for 1 minute before checking if the shutdown is still in progress
-	time.Sleep(60 * time.Second)
+	// Wait for 10 seconds before checking if the shutdown is still in progress
+	time.Sleep(10 * time.Second)
 
 	// Now, force the shutdown if the system hasn't powered off
-	log.Println("Force shutdown after waiting for 1 minute...")
+	log.Println("Force shutdown after waiting for 10 seconds...")
 	cmd = exec.Command("shutdown", "/s", "/f", "/t", "0") // Forcibly shutdown the PC immediately
 	err = cmd.Run()
 	if err != nil {
@@ -175,3 +195,47 @@ func shutdownPC() (string, string) {
 	return "success", "PC is shutting down (forcefully if necessary)"
 }
 
+func moveMouse(inputs []interface{}) (string, string) {
+	if len(inputs) < 2 {
+		return "error", "Invalid inputs for mouse move"
+	}
+
+	// Ensure that inputs[0] and inputs[1] are numbers
+	x, ok := inputs[0].(float64)
+	if !ok {
+		return "error", "Invalid X coordinate"
+	}
+
+	y, ok := inputs[1].(float64)
+	if !ok {
+		return "error", "Invalid Y coordinate"
+	}
+
+	robotgo.Move(int(x), int(y))
+	return "success", fmt.Sprintf("Mouse moved to: (%d, %d)", int(x), int(y))
+}
+
+func clickMouse(inputs []interface{}) (string, string) {
+	if len(inputs) < 1 {
+		return "error", "Invalid input for mouse click"
+	}
+
+	// Ensure inputs[0] is a string
+	clickType, ok := inputs[0].(string)
+	if !ok {
+		return "error", "Invalid click type"
+	}
+
+	switch clickType {
+	case "left":
+		robotgo.Click("left")
+	case "right":
+		robotgo.Click("right")
+	case "middle":
+		robotgo.Click("middle")
+	default:
+		return "error", "Unknown click type: " + clickType
+	}
+
+	return "success", fmt.Sprintf("%s click performed", clickType)
+}
