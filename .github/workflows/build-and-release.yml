@@ -1,0 +1,75 @@
+name: Build and Release Syra
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'  # Trigger this action on new tags (for example, v1.0.0)
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.20'  # Use the version you need
+
+    - name: Build Go Application
+      run: |
+        go build -ldflags="-H windowsgui" -o installer/syra.exe
+
+    - name: Set up Inno Setup
+      run: |
+        choco install innosetup
+
+    - name: Set Version in Inno Setup Script
+      run: |
+        cd installer
+        # Get version from Git tag (e.g., v1.0.0)
+        VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+        # Replace {#AppVersion} with the version from Git tag
+        sed -i "s/{#AppVersion}/$VERSION/" setup.iss
+        echo "Version set to: $VERSION"
+
+    - name: Create Installer with Inno Setup
+      run: |
+        cd installer
+        inno_setup_compiler "setup.iss"  # Make sure setup.iss is in the root of your repository
+
+    - name: Upload Installer as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: SyraInstaller
+        path: installer/Output/Syra-Win64-Setup.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Generate Changelog
+      run: |
+        VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 ${GITHUB_SHA}^)
+        CHANGELOG=$(git log --oneline ${PREVIOUS_VERSION}..${GITHUB_SHA})
+        echo "Changelog generated for version $VERSION:" > changelog.txt
+        echo "$CHANGELOG" >> changelog.txt
+        cat changelog.txt
+
+    - name: Create GitHub Release (Draft)
+      uses: softprops/action-gh-release@v1
+      with:
+        files: installer/Output/Syra-Win64-Setup.exe
+        body: |
+          $(cat changelog.txt)
+        draft: true  # Make the release a draft
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
