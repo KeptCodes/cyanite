@@ -23,9 +23,6 @@ jobs:
       run: |
         choco install mingw
 
-    - name: Clear Go Cache
-      run: go clean -modcache
-
     - name: Build Go Application
       run: |
         go build -ldflags="-H windowsgui" -o installer/syra.exe
