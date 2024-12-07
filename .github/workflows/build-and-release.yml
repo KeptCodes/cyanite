@@ -1,6 +1,7 @@
 name: Build and Release Syra
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'  # Trigger this action on new tags (for example, v1.0.0)
@@ -54,9 +55,21 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Create GitHub Release
+    - name: Generate Changelog
+      run: |
+        VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 ${GITHUB_SHA}^)
+        CHANGELOG=$(git log --oneline ${PREVIOUS_VERSION}..${GITHUB_SHA})
+        echo "Changelog generated for version $VERSION:" > changelog.txt
+        echo "$CHANGELOG" >> changelog.txt
+        cat changelog.txt
+
+    - name: Create GitHub Release (Draft)
       uses: softprops/action-gh-release@v1
       with:
-        files: Output/SyraInstaller.exe
+        files: installer/Output/Syra-Win64-Setup.exe
+        body: |
+          $(cat changelog.txt)
+        draft: true  # Make the release a draft
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
