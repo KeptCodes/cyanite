@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/keptcodes/cyanite-server/internal/utils"
 )
 
 // SecretCode structure for config.json
@@ -68,6 +70,7 @@ func GenerateRandomSecretCode() string {
 // InitializeConfig initializes the config file with a random secret code if it doesn't exist
 func InitializeConfig() error {
 	// Check if the config file exists
+	utils.CreateFilesDirectory("_data")
 	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
 		// Generate a random secret code
 		randomSecretCode := GenerateRandomSecretCode()

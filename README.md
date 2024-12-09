@@ -1,11 +1,11 @@
 <div align="center">
-    <img src="assets\syra_transparent.png" width="400" />
-    <h2>Syra Desktop</h2>
+    <img src="assets\cyanite.png" width="400" />
+    <h2>Cyanite</h2>
 </div>
 
 ## Project Overview
 
-Syra Desktop is a lightweight background client that allows seamless communication between your desktop and mobile devices. It integrates functionalities such as controlling the desktop remotely, checking mobile connection status, and setting a secret code for secure interaction.
+Cyanite is a lightweight background client that allows seamless communication between your desktop and mobile devices. It integrates functionalities such as controlling the desktop remotely, checking mobile connection status, and setting a secret code for secure interaction.
 
 ## Features
 
@@ -13,39 +13,6 @@ Syra Desktop is a lightweight background client that allows seamless communicati
 - **Mobile Connection Monitoring**: Allows checking if the mobile device is connected.
 - **Secret Code**: Generates a random secret code for secure interaction, which can be reset at any time.
 - **System Tray Icon**: Provides a system tray icon with options for managing mobile connections, secret codes, and more.
-
-## Installation
-
-To set up the Syra Desktop client, follow these steps:
-
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/<your-username>/syra-server.git
-   cd syra-server
-   ```
-
-2. **Build the project**:
-
-   If you haven't already, you'll need Go installed on your system. You can download it from [here](https://golang.org/dl/).
-
-   Once you have Go set up, you can build the project using the following command:
-
-   ```bash
-   go build
-   ```
-
-3. **Run the application**:
-
-   After building the project, run the compiled executable:
-
-   ```bash
-   ./syra-server
-   ```
-
-4. **System Tray**:
-
-   Upon running, syra Desktop will minimize to the system tray. You can interact with it through the tray icon.
 
 ## TODO
 

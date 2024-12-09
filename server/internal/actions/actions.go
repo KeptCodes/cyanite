@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
-	"github.com/keptcodes/syra-server/internal/config"
-	"github.com/keptcodes/syra-server/internal/utils"
+	"github.com/keptcodes/cyanite-server/internal/config"
+	"github.com/keptcodes/cyanite-server/internal/utils"
 )
 
 type Action struct {

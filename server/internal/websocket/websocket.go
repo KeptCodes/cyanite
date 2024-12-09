@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/keptcodes/syra-server/internal/actions"
-	"github.com/keptcodes/syra-server/internal/utils"
+	"github.com/keptcodes/cyanite-server/internal/actions"
+	"github.com/keptcodes/cyanite-server/internal/utils"
 )
 
 var upgrader = websocket.Upgrader{
@@ -20,7 +19,7 @@ var upgrader = websocket.Upgrader{
 
 // StartServer starts both the HTTP server to serve files and the WebSocket server
 func StartServer() {
-	createFilesDirectory()
+	utils.CreateFilesDirectory("_data/files")
 	// Start the HTTP server to serve files
 	go startHTTPServer()
 
@@ -42,6 +41,12 @@ func startWebSocketServerWithRetry() {
 
 // startWebSocketServer starts the WebSocket server
 func startWebSocketServer() error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered from panic in WebSocket server: %v", r)
+		}
+	}()
+
 	http.HandleFunc("/", handleConnection)
 	server := &http.Server{
 		Addr: ":8765",
@@ -49,12 +54,13 @@ func startWebSocketServer() error {
 
 	ip := utils.GetOutboundIP()
 	log.Printf("WebSocket server started at ws://%s:8765", ip)
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Printf("Error in WebSocket server: %v", err)
 		return err
 	}
 	return nil
 }
+
 
 // handleConnection handles WebSocket connections
 func handleConnection(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +80,12 @@ func handleMessage(conn *websocket.Conn) {
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			log.Printf("Error reading message: %v", err)
+			// Handle WebSocket closure gracefully
+			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
+				log.Printf("WebSocket connection closed: %v", err)
+			} else {
+				log.Printf("Error reading message: %v", err)
+			}
 			return
 		}
 		fmt.Printf("Received: %s\n", p)
@@ -93,6 +104,7 @@ func handleMessage(conn *websocket.Conn) {
 	}
 }
 
+
 // Start HTTP server to serve files under _data/files directory
 func startHTTPServer() {
 	// Serve files from the _data/files directory
@@ -109,15 +121,3 @@ func startHTTPServer() {
 	}
 }
 
-func createFilesDirectory() {
-	filesDir := "_data/files"
-
-	// Check if the directory exists
-	if _, err := os.Stat(filesDir); os.IsNotExist(err) {
-		// If it doesn't exist, create the directory
-		err := os.MkdirAll(filesDir, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Error creating _data/files directory: %v", err)
-		}
-	}
-}

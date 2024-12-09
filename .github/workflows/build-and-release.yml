@@ -1,13 +1,17 @@
-name: Build and Release Syra
+name: Build and Release Cyanite
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*'  # Trigger this action on new tags (for example, v1.0.0)
+      - 'v*'  # Trigger this action on new tags (e.g., v1.0.0)
 
 jobs:
   build:
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./server
     runs-on: windows-latest
 
     steps:
@@ -21,35 +25,35 @@ jobs:
 
     - name: Install MinGW (GCC)
       run: |
-        choco install mingw
+        choco install mingw -y
 
     - name: Build Go Application
       run: |
-        go build -ldflags="-H windowsgui" -o installer/syra.exe
+        mkdir -p installer
+        go build -ldflags="-H windowsgui" -o installer/cyanite.exe
 
     - name: Set up Inno Setup
       run: |
-        choco install innosetup
+        choco install innosetup -y
 
     - name: Set Version in Inno Setup Script
       run: |
         cd installer
-        # Get version from Git tag (e.g., v1.0.0)
-        VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
-        # Replace {#AppVersion} with the version from Git tag
+        # Extract version from GitHub ref (refs/tags/v1.0.0 -> 1.0.0)
+        VERSION=$(echo "${GITHUB_REF}" | sed -e 's|refs/tags/||' -e 's|v||')
         sed -i "s/{#AppVersion}/$VERSION/" setup.iss
         echo "Version set to: $VERSION"
 
     - name: Create Installer with Inno Setup
       run: |
         cd installer
-        inno_setup_compiler "setup.iss"  # Make sure setup.iss is in the root of your repository
+        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
 
     - name: Upload Installer as Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SyraInstaller
-        path: installer/Output/Syra-Win64-Setup.exe
+        name: CyaniteInstaller
+        path: installer/Output/Cyanite-Win64-Setup.exe
 
   release:
     needs: build
@@ -61,9 +65,9 @@ jobs:
 
     - name: Generate Changelog
       run: |
-        VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
-        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 ${GITHUB_SHA}^)
-        CHANGELOG=$(git log --oneline ${PREVIOUS_VERSION}..${GITHUB_SHA})
+        VERSION=$(echo "${GITHUB_REF}" | sed -e 's|refs/tags/||')
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 "${GITHUB_SHA}^")
+        CHANGELOG=$(git log --oneline "${PREVIOUS_VERSION}..${GITHUB_SHA}")
         echo "Changelog generated for version $VERSION:" > changelog.txt
         echo "$CHANGELOG" >> changelog.txt
         cat changelog.txt
@@ -71,9 +75,9 @@ jobs:
     - name: Create GitHub Release (Draft)
       uses: softprops/action-gh-release@v2
       with:
-        files: installer/Output/Syra-Win64-Setup.exe
+        files: installer/Output/Cyanite-Win64-Setup.exe
         body: |
           $(cat changelog.txt)
-        draft: true  # Make the release a draft
+        draft: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

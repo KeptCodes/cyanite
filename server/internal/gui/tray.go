@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/getlantern/systray"
-	"github.com/keptcodes/syra-server/internal/config"
-	"github.com/keptcodes/syra-server/internal/utils"
+	"github.com/keptcodes/cyanite-server/internal/config"
+	"github.com/keptcodes/cyanite-server/internal/utils"
 )
 
 var secretCode string // Store the secret code
@@ -31,12 +31,12 @@ func Start() error {
 
 func onReady() {
 	// Set up tray icon
-	var iconData, err = os.ReadFile("assets/syra.ico")
+	var iconData, err = os.ReadFile("assets/cyanite.ico")
 	if err != nil {
 		log.Fatal("Error loading icon: ", err)
 	}
 	systray.SetIcon(iconData)
-	systray.SetTooltip("Syra Desktop Client")
+	systray.SetTooltip("Cyanite Desktop Client")
 
 	// Show current secret code in the tray
 	systray.SetTooltip(fmt.Sprintf("Secret Code: %s", secretCode))

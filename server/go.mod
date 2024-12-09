@@ -1,4 +1,4 @@
-module github.com/keptcodes/syra-server
+module github.com/keptcodes/cyanite-server
 
 go 1.23
 

@@ -4,18 +4,18 @@ import (
 	"log"
 	"os"
 
-	"github.com/keptcodes/syra-server/internal/gui"
-	"github.com/keptcodes/syra-server/internal/websocket"
+	"github.com/keptcodes/cyanite-server/internal/gui"
+	"github.com/keptcodes/cyanite-server/internal/websocket"
 )
 
 func init() {
 	// Set up error logging to a file
-	file, err := os.OpenFile("syra_logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, err := os.OpenFile("cyanite_logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalf("Error opening log file: %v", err)
 	}
 	log.SetOutput(file)
-	log.Println("Starting Syra application...")
+	log.Println("Starting Cyanite application...")
 
 	if err != nil {
 		log.Fatalf("Failed to add to startup: %v", err)
