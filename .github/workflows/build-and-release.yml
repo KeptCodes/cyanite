@@ -69,6 +69,12 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
+    - name: Download Installer Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: CyaniteInstaller
+        path: ./installer
+
     - name: Generate Changelog
       run: |
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
@@ -85,7 +91,7 @@ jobs:
     - name: Create GitHub Release (Draft)
       uses: softprops/action-gh-release@v2
       with:
-        files: installer/Output/Cyanite-Win64-Setup.exe
+        files: installer/Cyanite-Win64-Setup.exe
         body: |
           $(cat changelog.txt)
         draft: true
