@@ -40,8 +40,10 @@ jobs:
       run: |
         cd installer
         # Extract version from GitHub ref (refs/tags/v1.0.0 -> 1.0.0)
-        VERSION=$(echo "${GITHUB_REF}" | sed -e 's|refs/tags/||' -e 's|v||')
-        sed -i "s/{#AppVersion}/$VERSION/" setup.iss
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        # Update setup.iss with the version
+        powershell -Command "(Get-Content setup.iss) -replace '{#AppVersion}', '$VERSION' | Set-Content setup.iss"
         echo "Version set to: $VERSION"
 
     - name: Create Installer with Inno Setup
