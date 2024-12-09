@@ -39,10 +39,14 @@ jobs:
     - name: Set Version in Inno Setup Script
       run: |
         cd installer
-        # Extract version from GitHub ref (refs/tags/v1.0.0 -> 1.0.0)
-        VERSION=${GITHUB_REF#refs/tags/}
-        VERSION=${VERSION#v}
-        # Update setup.iss with the version
+        # Extract version from GITHUB_REF (refs/tags/v1.0.0 -> 1.0.0)
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+        else
+          VERSION="0.0.0" # Default version if no tag
+        fi
+        # Replace {#AppVersion} in setup.iss
         powershell -Command "(Get-Content setup.iss) -replace '{#AppVersion}', '$VERSION' | Set-Content setup.iss"
         echo "Version set to: $VERSION"
 
@@ -67,9 +71,13 @@ jobs:
 
     - name: Generate Changelog
       run: |
-        VERSION=$(echo "${GITHUB_REF}" | sed -e 's|refs/tags/||')
-        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 "${GITHUB_SHA}^")
-        CHANGELOG=$(git log --oneline "${PREVIOUS_VERSION}..${GITHUB_SHA}")
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="0.0.0" # Default version if no tag
+        fi
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || echo "Initial")
+        CHANGELOG=$(git log --oneline "${PREVIOUS_VERSION}".."${GITHUB_SHA}" 2>/dev/null || echo "No changes found.")
         echo "Changelog generated for version $VERSION:" > changelog.txt
         echo "$CHANGELOG" >> changelog.txt
         cat changelog.txt
